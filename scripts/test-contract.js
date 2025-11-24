@@ -26,16 +26,16 @@ async function main() {
 
     try {
         const owner = await liquidator.owner();
-        console.log("✅ Owner:", owner);
-        console.log("   Is owner you?", owner.toLowerCase() === signerAddress.toLowerCase());
+        console.log("Owner:", owner);
+        console.log("Is owner you?", owner.toLowerCase() === signerAddress.toLowerCase());
 
         const aavePool = await liquidator.aavePool();
-        console.log("✅ Aave Pool:", aavePool);
+        console.log("Aave Pool:", aavePool);
 
         const value = await liquidator.value();
-        console.log("✅ Current Value:", value.toString());
+        console.log("Current Value:", value.toString());
     } catch (error) {
-        console.error("❌ Error reading state:", error.message);
+        console.error("Error reading state:", error.message);
     }
 
     console.log("\n" + "=".repeat(60));
@@ -52,13 +52,13 @@ async function main() {
         
         console.log("Waiting for confirmation...");
         await tx.wait();
-        console.log("✅ Transaction confirmed!");
+        console.log("Transaction confirmed!");
 
         const valueAfter = await liquidator.value();
         console.log("Value after:", valueAfter.toString());
         console.log("Increment successful:", valueAfter.toNumber() === valueBefore.toNumber() + 1);
     } catch (error) {
-        console.error("❌ Error incrementing:", error.message);
+        console.error("Error incrementing:", error.message);
     }
 
     console.log("\n" + "=".repeat(60));
@@ -68,9 +68,9 @@ async function main() {
     try {
         const owner = await liquidator.owner();
         if (owner.toLowerCase() !== signerAddress.toLowerCase()) {
-            console.log("⚠️  You are not the owner. Skipping owner-only tests.");
+            console.log("You are not the owner. Skipping owner-only tests.");
         } else {
-            console.log("✅ You are the owner. Owner-only functions available.");
+            console.log("You are the owner. Owner-only functions available.");
             
             // Test withdraw function (will fail if no tokens in contract)
             console.log("\nTesting withdraw function...");
@@ -84,7 +84,7 @@ async function main() {
             // console.log("✅ Withdraw successful!");
         }
     } catch (error) {
-        console.error("❌ Error testing owner functions:", error.message);
+        console.error("Error testing owner functions:", error.message);
     }
 
     console.log("\n" + "=".repeat(60));
@@ -95,7 +95,7 @@ async function main() {
         const balance = await hre.ethers.provider.getBalance(LIQUIDATOR_ADDRESS);
         console.log("Contract Balance:", hre.ethers.utils.formatEther(balance), "ETH");
     } catch (error) {
-        console.error("❌ Error checking balance:", error.message);
+        console.error("Error checking balance:", error.message);
     }
 
     console.log("\n" + "=".repeat(60));

@@ -7,11 +7,11 @@ async function main() {
     console.log("=".repeat(60));
     console.log("NEW TESTNET WALLET GENERATED");
     console.log("=".repeat(60));
-    console.log("\n📍 Address:", wallet.address);
-    console.log("\n🔑 Private Key:", wallet.privateKey);
-    console.log("\n⚠️  IMPORTANT: Save this private key securely!");
-    console.log("⚠️  Never share your private key with anyone!");
-    console.log("⚠️  This is for TESTNET only - DO NOT send real funds!");
+    console.log("\nAddress:", wallet.address);
+    console.log("\nPrivate Key:", wallet.privateKey);
+    console.log("\nIMPORTANT: Save this private key securely!");
+    console.log("Never share your private key with anyone!");
+    console.log("This is for TESTNET only - DO NOT send real funds!");
     console.log("\n" + "=".repeat(60));
     console.log("\nUpdate your .env file with:");
     console.log(`PRIVATE_KEY=${wallet.privateKey.slice(2)}`);

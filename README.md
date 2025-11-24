@@ -1,217 +1,224 @@
 # Aave Liquidation Bot
 
-Automated liquidation bot for the Aave V3 lending protocol. This bot monitors Aave positions and executes profitable liquidations on undercollateralized loans.
+Automated liquidation bot for Aave V3 lending protocol. Monitors specific user positions and executes liquidations when they become undercollateralized.
+
+## Features
+
+- 🔍 Monitors health factors of specified user addresses
+- ⚡ Automatically executes liquidations when HF < 1.0
+- 🧪 Dry-run mode for safe testing
+- 📊 Real-time position monitoring
+- 🔒 Owner-only liquidation contract with profit withdrawal
 
 ## Prerequisites
 
 - Node.js >= 18.0.0
-- npm or yarn
-- An wallet with private key
-- Token for gas fees
-- RPC endpoint
+- Wallet with private key
+- Tokens for gas fees
+- RPC endpoint (XRPL EVM or Ethereum)
 
 ## Installation
 
-1. Clone the repository and install dependencies:
+1. Clone and install dependencies:
 
 ```bash
+git clone <repository-url>
+cd liquidationBot
 npm install
 ```
 
-2. Create a `.env` file in the root directory:
+2. Create `.env` file:
 
 ```env
-PRIVATE_KEY=your_private_key_here
+# Network
 XRPL_EVM_RPC=https://rpc.testnet.xrplevm.org/
-AAVE_POOL_ADDRESS=0x6Ae43d3271ff6888e7Fc43Fd7321a503ff738951
-```
 
-**Note:** Using Sepolia's Aave V3 pool address as reference.
+# Wallet
+PRIVATE_KEY=your_private_key_here
+
+# Contracts
+LIQUIDATOR_CONTRACT_ADDRESS=0x2af66A4CdFA57661F323f7145C47616e249FDba6
+AAVE_POOL_ADDRESS=0x6Ae43d3271ff6888e7Fc43Fd7321a503ff738951
+
+# Monitored Users (comma-separated)
+MONITORED_USERS=0x1234...,0x5678...
+
+# Bot Settings
+MIN_PROFIT_USD=5
+SCAN_INTERVAL=5000
+DRY_RUN=true
+```
 
 ## Smart Contract
 
-### Liquidator Contract
+### Deploy Contract
 
-The `Liquidator.sol` contract is the core smart contract that executes liquidations on the Aave protocol.
-
-**Location:** `contract/liquidator.sol`
-
-**Key Features:**
-- Owner-only access control for withdrawals
-- Integration with Aave V3 Pool interface
-- ERC20 token handling via OpenZeppelin contracts
-- Emergency withdrawal function for rescued funds
-
-
-**Dependencies:**
-- `@aave/core-v3` - Aave V3 protocol interfaces
-- `@openzeppelin/contracts` - Standard ERC20 interface
-
-### Compiling the Contract
-
-Compile the smart contract using Hardhat:
-
+1. Compile:
 ```bash
 npx hardhat compile
 ```
 
-This will generate the contract artifacts in the `artifacts/` directory.
-
-### Deploying the Contract
-
-#### 1. Configure Your Network
-
-Edit `hardhat.config.js` to add your target network:
-
-
-#### 2. Deploy Using Script
-
-Deploy to XRPL EVM:
-
+2. Deploy to XRPL EVM:
 ```bash
 npx hardhat run scripts/deploy.js --network xrplEVM
 ```
 
-The contract will be deployed using Sepolia's Aave V3 pool address (0x6Ae43d3271ff6888e7Fc43Fd7321a503ff738951) as reference.
-
-#### 3. Save Deployed Address
-
-After deployment, save the contract address shown in the console output:
-
-```
-Liquidator deployed at: 0x...
-```
-
-Add this to your `.env` file:
-
+3. Save the deployed address to `.env`:
 ```env
 LIQUIDATOR_CONTRACT_ADDRESS=0x...
 ```
 
-### Testing the Contract
-
-Run the test suite:
-
-```bash
-npm test
-```
-
-Or using Hardhat directly:
-
-```bash
-npx hardhat test
-```
-
-For more verbose output:
-
-```bash
-npx hardhat test --verbose
-```
-
-### Verifying the Contract
-
-1. Run the verification command:
-
-```bash
-npx hardhat verify --network mainnet <DEPLOYED_CONTRACT_ADDRESS>
-```
-
-### Testing Deployed Contract
-
-After deploying your contract, you can test it with the provided test scripts:
-
-#### Basic Contract Test
-
-Test basic functionality (owner, increment, state):
+### Test Contract
 
 ```bash
 npx hardhat run scripts/test-contract.js --network xrplEVM
 ```
 
-This script will:
-- Read contract state (owner, aavePool, value)
-- Test the increment function
-- Check contract balance
-- Verify owner-only access
+### Contract Features
 
-#### Liquidation Function Test
+- Owner-only access control
+- Integration with Aave V3 Pool
+- Emergency token withdrawal
+- Liquidation event logging
 
-Test the liquidation functionality:
+## Running the Bot
 
-```bash
-npx hardhat run scripts/test-liquidation.js --network xrplEVM
-```
+### Start in Test Mode (Recommended)
 
-**Note:** Before running liquidation tests, you need to:
-1. Update token addresses in `scripts/test-liquidation.js`
-2. Have sufficient debt tokens in your wallet
-3. Approve the liquidator contract to spend your tokens
-4. Have a valid borrower address to liquidate
-
-## Available Scripts
-
-### Bot Operations
-
-**Start the liquidation bot:**
 ```bash
 npm start
 ```
 
-**Start with auto-restart (development):**
+The bot will:
+- Check monitored users every 5 seconds
+- Display health factors and debt amounts
+- Simulate liquidations without executing transactions
+
+### Start in Live Mode
+
+1. Set `DRY_RUN=false` in `.env`
+2. Ensure you have sufficient gas fees
+3. Run:
+
 ```bash
-npm run dev
+npm start
 ```
 
-## Aave V3 Pool Addresses
+**Warning:** Live mode executes real transactions and spends gas!
+
+### Stop the Bot
+
+Press `Ctrl + C`
+
+## Utility Scripts
+
+### Create New Wallet
+
+```bash
+node scripts/create-wallet.js
+```
+
+### Check Wallet Balance
+
+```bash
+npx hardhat run scripts/check-balance.js --network xrplEVM
+```
+
+## How It Works
+
+1. **Scanning:** Bot queries Aave for health factors of monitored users
+2. **Detection:** Identifies positions with HF < 1.0 and debt > 0
+3. **Execution:** Calls liquidator contract to execute liquidation
+4. **Profit:** Contract receives collateral bonus and transfers to owner
+
+## Configuration Options
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `XRPL_EVM_RPC` | RPC endpoint URL | Required |
+| `PRIVATE_KEY` | Wallet private key | Required |
+| `LIQUIDATOR_CONTRACT_ADDRESS` | Deployed contract address | Required |
+| `AAVE_POOL_ADDRESS` | Aave V3 Pool address | Required |
+| `MONITORED_USERS` | Addresses to monitor (comma-separated) | Required |
+| `MIN_PROFIT_USD` | Minimum profit threshold | 5 |
+| `SCAN_INTERVAL` | Time between scans (ms) | 5000 |
+| `DRY_RUN` | Enable test mode | true |
 
 ## Project Structure
 
 ```
 liquidationBot/
-├── bot/                    # Bot logic
-│   ├── index.js           # Main bot entry point
-├── contract/              # Smart contracts
-│   └── liquidator.sol     # Main liquidator contract
-├── scripts/               # Utility scripts
-│   ├── deploy.js          # Deployment script
-│   ├── test-contract.js   # Basic contract testing
-│   ├── test-liquidation.js # Liquidation function testing
-│   ├── create-wallet.js   # Wallet generation
-│   └── check-balance.js   # Balance checker
-├── hardhat.config.js      # Hardhat configuration
-├── package.json           # Dependencies
-└── .env                   # Environment variables (create this)
+├── bot/
+│   ├── index.js          # Main bot logic
+│   ├── config.js         # Configuration
+│   ├── contracts.js      # Contract interactions
+│   └── scanner.js        # Position scanner
+├── contract/
+│   └── liquidator.sol    # Liquidation smart contract
+├── scripts/
+│   ├── deploy.js         # Deploy contract
+│   ├── test-contract.js  # Test deployed contract
+│   ├── create-wallet.js  # Generate wallet
+│   └── check-balance.js  # Check balance
+├── hardhat.config.js     # Hardhat config
+├── package.json          # Dependencies
+└── .env                  # Configuration (create this)
 ```
 
-## Security Considerations
+## Smart Contract (Solidity)
 
-1. **Never commit your `.env` file** - It's already in `.gitignore`
-2. **Use a dedicated wallet** - Don't use your main wallet for the bot
-3. **Start with testnet** - Test thoroughly on Sepolia before mainnet
-4. **Monitor gas costs** - Set appropriate gas limits and prices
-5. **Keep private keys secure** - Use environment variables, never hardcode
+The liquidator contract (`contract/liquidator.sol`):
+- Receives debt tokens from bot
+- Executes liquidation on Aave
+- Receives collateral with 5% bonus
+- Transfers profit to owner
+
+## Bot Architecture
+
+1. **Config** - Loads environment variables
+2. **ContractManager** - Handles blockchain interactions
+3. **PositionScanner** - Monitors user health factors
+4. **Bot** - Orchestrates scanning and liquidation
+
+## Safety Features
+
+- ✅ Dry-run mode for testing
+- ✅ Health factor validation (HF < 1.0)
+- ✅ Owner-only contract access
+- ✅ Minimum profit threshold
+- ✅ Configurable scan interval
+
+## Aave V3 Pool Addresses
+
+| Network | Pool Address |
+|---------|-------------|
+| Ethereum Mainnet | `0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2` |
+| Sepolia Testnet | `0x6Ae43d3271ff6888e7Fc43Fd7321a503ff738951` |
+| Polygon | `0x794a61358D6845594F94dc1DB02A252b5b4814aD` |
+| Arbitrum | `0x794a61358D6845594F94dc1DB02A252b5b4814aD` |
 
 ## Troubleshooting
 
-### Contract Compilation Errors
+**Bot won't start:**
+- Verify all required env variables are set
+- Check MONITORED_USERS is not empty
 
-If you see import errors, ensure dependencies are installed:
+**No liquidatable positions:**
+- Ensure monitored addresses have active Aave positions
+- Check addresses are correct
 
-```bash
-npm install @aave/core-v3 @openzeppelin/contracts
-```
+**Transaction fails:**
+- Verify sufficient gas in wallet
+- Check debt token balance
+- Ensure contract is deployed correctly
 
-### Deployment Failures
+## Security Considerations
 
-- Check your wallet has sufficient ETH for deployment
-- Verify RPC_URL is correct and accessible
-- Ensure PRIVATE_KEY is properly formatted (with or without 0x prefix)
-
-### Bot Not Finding Liquidations
-
-- Verify AAVE_POOL_ADDRESS matches your network
-- Check liquidation thresholds in configuration
-- Ensure RPC endpoint is stable and not rate-limited
+1. **Never commit `.env`** - It's gitignored by default
+2. **Use dedicated wallet** - Don't use your main wallet
+3. **Test on testnet first** - Always use DRY_RUN=true initially
+4. **Monitor gas costs** - Track profitability
+5. **Keep private key secure** - Use environment variables only
 
 ## License
 
@@ -219,5 +226,4 @@ MIT
 
 ## Disclaimer
 
-This software is provided as-is. Liquidation bots involve financial risk. Always test thoroughly on testnets before using real funds. The authors are not responsible for any losses incurred.
-
+This software is provided as-is. Liquidation bots involve financial risk. Always test thoroughly on testnets before deploying with real funds. The authors are not responsible for any losses incurred.
