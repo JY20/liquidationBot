@@ -1,10 +1,10 @@
 import hre from "hardhat";
 
 async function main() {
-    const Counter = await hre.ethers.getContractFactory("Counter");
-    const counter = await Counter.deploy();
-    await counter.deployed();
-    console.log("Counter deployed at:", counter.address);
+    const LiquidatorFactory = await hre.ethers.getContractFactory("Liquidator");
+    const liquidator = await LiquidatorFactory.deploy();
+    await liquidator.deployed();
+    console.log("Liquidator deployed at:", liquidator.address);
 }
 
 main().catch((err) => {

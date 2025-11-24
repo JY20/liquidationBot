@@ -9,6 +9,11 @@ contract Liquidator {
     IPool public immutable aavePool;
     uint256 public value;
 
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Not owner");
+        _;
+    }
+
     constructor() {
         owner = msg.sender;
     }
