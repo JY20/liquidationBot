@@ -1,0 +1,35 @@
+{
+  "name": "aave-liquidation-bot",
+  "version": "2.0.0",
+  "description": "Automated liquidation bot for Aave lending protocol",
+  "type": "module",
+  "main": "bot/index.js",
+  "scripts": {
+    "start": "node bot/index.js",
+    "dev": "node --watch bot/index.js",
+    "test": "hardhat test"
+  },
+  "keywords": [
+    "aave",
+    "liquidation",
+    "defi",
+    "ethereum",
+    "bot"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@nomiclabs/hardhat-ethers": "^2.2.3",
+    "@nomiclabs/hardhat-waffle": "^2.0.6",
+    "chai": "^4.3.10",
+    "dotenv": "^17.2.3",
+    "ethereum-waffle": "^4.0.10",
+    "ethers": "^5.8.0",
+    "hardhat": "^2.22.15"
+  },
+  "dependencies": {
+    "@aave/core-v3": "^1.19.3",
+    "@openzeppelin/contracts": "^5.4.0"
+  }
+}
