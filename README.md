@@ -23,7 +23,10 @@ npm install
 ```env
 PRIVATE_KEY=your_private_key_here
 XRPL_EVM_RPC=https://rpc.testnet.xrplevm.org/
+AAVE_POOL_ADDRESS=0x6Ae43d3271ff6888e7Fc43Fd7321a503ff738951
 ```
+
+**Note:** Using Sepolia's Aave V3 pool address as reference.
 
 ## Smart Contract
 
@@ -63,12 +66,13 @@ Edit `hardhat.config.js` to add your target network:
 
 #### 2. Deploy Using Script
 
-Deploy to your configured network:
+Deploy to XRPL EVM:
 
 ```bash
-# Deploy to XRPL EVM
 npx hardhat run scripts/deploy.js --network xrplEVM
 ```
+
+The contract will be deployed using Sepolia's Aave V3 pool address (0x6Ae43d3271ff6888e7Fc43Fd7321a503ff738951) as reference.
 
 #### 3. Save Deployed Address
 
@@ -112,6 +116,38 @@ npx hardhat test --verbose
 npx hardhat verify --network mainnet <DEPLOYED_CONTRACT_ADDRESS>
 ```
 
+### Testing Deployed Contract
+
+After deploying your contract, you can test it with the provided test scripts:
+
+#### Basic Contract Test
+
+Test basic functionality (owner, increment, state):
+
+```bash
+npx hardhat run scripts/test-contract.js --network xrplEVM
+```
+
+This script will:
+- Read contract state (owner, aavePool, value)
+- Test the increment function
+- Check contract balance
+- Verify owner-only access
+
+#### Liquidation Function Test
+
+Test the liquidation functionality:
+
+```bash
+npx hardhat run scripts/test-liquidation.js --network xrplEVM
+```
+
+**Note:** Before running liquidation tests, you need to:
+1. Update token addresses in `scripts/test-liquidation.js`
+2. Have sufficient debt tokens in your wallet
+3. Approve the liquidator contract to spend your tokens
+4. Have a valid borrower address to liquidate
+
 ## Available Scripts
 
 ### Bot Operations
@@ -138,6 +174,10 @@ liquidationBot/
 │   └── liquidator.sol     # Main liquidator contract
 ├── scripts/               # Utility scripts
 │   ├── deploy.js          # Deployment script
+│   ├── test-contract.js   # Basic contract testing
+│   ├── test-liquidation.js # Liquidation function testing
+│   ├── create-wallet.js   # Wallet generation
+│   └── check-balance.js   # Balance checker
 ├── hardhat.config.js      # Hardhat configuration
 ├── package.json           # Dependencies
 └── .env                   # Environment variables (create this)
